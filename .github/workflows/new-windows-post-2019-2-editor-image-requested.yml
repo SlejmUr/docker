@@ -19,10 +19,13 @@ on:
         description: "All digits of the latest tag of this repository, e.g. `1.23.45`"
         required: true
       repoVersionMinor:
-        description: "Minor digit of that tag, e.g. `23`"
+        description: "Minor digit of that tag, e.g. `1.23`"
         required: true
       repoVersionMajor:
         description: "Major digit of that tag, e.g. `1`"
+        required: true
+      unityCiVersion:
+        description: "All digit for the version unityci has (3.2.2)"
         required: true
 
 # Further reading:
@@ -49,12 +52,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Checkout latest release tag
-        run: |
-          LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
-          git checkout $LATEST_TAG
-        shell: bash
-
       #################
       #   Variables   #
       #################
@@ -70,6 +67,7 @@ jobs:
             echo "repoVersionFull=${{ github.event.inputs.repoVersionFull }}" >> $Env:GITHUB_OUTPUT
             echo "repoVersionMinor=${{ github.event.inputs.repoVersionMinor }}" >> $Env:GITHUB_OUTPUT
             echo "repoVersionMajor=${{ github.event.inputs.repoVersionMajor }}" >> $Env:GITHUB_OUTPUT
+            echo "unityCiVersion=${{ github.event.inputs.unityCiVersion }}" >> $Env:GITHUB_OUTPUT
           } else
           {
             # Repo Dispatch
@@ -79,6 +77,7 @@ jobs:
             echo "repoVersionFull=${{ github.event.client_payload.repoVersionFull }}" >> $Env:GITHUB_OUTPUT
             echo "repoVersionMinor=${{ github.event.client_payload.repoVersionMinor }}" >> $Env:GITHUB_OUTPUT
             echo "repoVersionMajor=${{ github.event.client_payload.repoVersionMajor }}" >> $Env:GITHUB_OUTPUT
+            echo "unityCiVersion=${{ github.event.client_payload.unityCiVersion }}" >> $Env:GITHUB_OUTPUT
           }
 
       - name: Show hook input
@@ -90,6 +89,7 @@ jobs:
           echo "repoVersion (full): ${{ steps.buildParameters.outputs.repoVersionFull }}"
           echo "repoVersion (only minor and major): ${{ steps.buildParameters.outputs.repoVersionMinor }}"
           echo "repoVersion (only major): ${{ steps.buildParameters.outputs.repoVersionMajor }}"
+          echo "unityCiVersion: ${{ steps.buildParameters.outputs.unityCiVersion }}"
 
       #############
       #   Setup   #
@@ -152,10 +152,10 @@ jobs:
       #   Pull previous images   #
       ############################
       - name: Pull windows base image (must exist)
-        run: docker pull unityci/base:windows-${{ steps.buildParameters.outputs.repoVersionFull }}
+        run: docker pull unityci/base:windows-${{ steps.buildParameters.outputs.unityCiVersion }}
 
       - name: Pull windows hub image (must exist)
-        run: docker pull unityci/hub:windows-${{ steps.buildParameters.outputs.repoVersionFull }}
+        run: docker pull unityci/hub:windows-${{ steps.buildParameters.outputs.unityCiVersion }}
 
       ############################
       #   Windows Editor image   #
@@ -165,8 +165,8 @@ jobs:
         continue-on-error: true
         run: |
           docker build ./images/windows/editor/ `
-            --build-arg hubImage=unityci/hub:windows-${{ steps.buildParameters.outputs.repoVersionFull }} `
-            --build-arg baseImage=unityci/base:windows-${{ steps.buildParameters.outputs.repoVersionFull }} `
+            --build-arg hubImage=unityci/hub:windows-${{ steps.buildParameters.outputs.unityCiVersion }} `
+            --build-arg baseImage=unityci/base:windows-${{ steps.buildParameters.outputs.unityCiVersion }} `
             --build-arg version=${{ steps.buildParameters.outputs.editorVersion }} `
             --build-arg changeSet=${{ steps.buildParameters.outputs.changeSet }} `
             --build-arg module=${{ matrix.targetPlatform }} `
