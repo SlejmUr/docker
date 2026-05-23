@@ -39,13 +39,12 @@ RUN "if [ $module = 'base' ]; then \
      elif [ $module = 'all' ]; then \
         C:/Program\ Files/Unity\ Hub/Unity\ Hub.exe -- --headless install-modules \
                                                     --version $version \
-                                                    --module windows-server windows-mono windows-il2cpp \
+                                                    --module windows-server windows-il2cpp \
                                                     --childModules \
                                                     | tee /var/log/install-module-${module}.log \
                                                     && grep 'Missing module' /var/log/install-module-${module}.log \
                                                     | exit $(wc -l); \
      else \
-
         C:/Program\ Files/Unity\ Hub/Unity\ Hub.exe -- --headless install-modules \
                                                     --version $version \
                                                     --module $module \

@@ -41,7 +41,6 @@ jobs:
           - base
           - windows-il2cpp
           - windows-server
-          - windows-mono
           - all
 
     steps:
